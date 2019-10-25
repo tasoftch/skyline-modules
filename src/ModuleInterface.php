@@ -23,84 +23,70 @@
 
 namespace Skyline\Module;
 
+use TASoft\Config\Config;
 
-class Module implements ModuleInterface
+/**
+ * A module can extend an existing application setup by several specific information.
+ *
+ * The module is determined while application bootstrap and is then able to adjust several settings.
+ *
+ * @package Skyline\Module
+ */
+interface ModuleInterface
 {
-    private $locations;
-    private $services;
-    private $parameters;
-    private $classesDirectory;
-    /** @var string */
-    private $classPrefix;
-    /** @var string|null */
-    private $componentsDirectory;
-    /** @var string|null */
-    private $templatesDirectory;
-
-    private $routingTable;
+    /**
+     * Gets additional locations
+     *
+     * @return array|Config
+     */
+    public function getLocations();
 
     /**
+     * Get module specific parameters
+     * @return array|Config
+     */
+    public function getParameters();
+
+    /**
+     * Gets additional services
+     *
+     * @return array|Config
+     */
+    public function getServices();
+
+    /**
+     * Gets additional routings
+     *
+     * @return array|Config
+     */
+    public function getRoutingTable();
+
+    /**
+     * Gets additional module classes or null, if there are no further classes available
+     *
      * @return string|null
      */
-    public function getComponentsDirectory(): ?string
-    {
-        return $this->componentsDirectory;
-    }
+    public function getClassesDirectory(): ?string;
 
     /**
-     * @return string|null
-     */
-    public function getTemplatesDirectory(): ?string
-    {
-        return $this->templatesDirectory;
-    }
-
-
-    /**
-     * @return mixed
-     */
-    public function getLocations()
-    {
-        return $this->locations;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getServices()
-    {
-        return $this->services;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getParameters()
-    {
-        return $this->parameters;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getClassesDirectory(): ?string
-    {
-        return $this->classesDirectory;
-    }
-
-    /**
+     * If your module uses classes, you must declare the module prefix.
+     * Ex: Application\MyModule
+     *
      * @return string
      */
-    public function getClassPrefix(): string
-    {
-        return $this->classPrefix;
-    }
+    public function getClassPrefix(): string;
 
     /**
-     * @return mixed
+     * Further components
+     *
+     * @return string|null
      */
-    public function getRoutingTable()
-    {
-        return $this->routingTable;
-    }
+    public function getComponentsDirectory(): ?string;
+
+    /**
+     * Further templates
+     *
+     * @return string|null
+     */
+    public function getTemplatesDirectory(): ?string;
 }

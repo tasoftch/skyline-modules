@@ -21,24 +21,20 @@
  * SOFTWARE.
  */
 
-namespace Skyline\Module\Compiler;
+namespace Skyline\Module\Loader;
 
 
-use Skyline\Compiler\AbstractCompiler;
-use Skyline\Compiler\CompilerContext;
-use Skyline\Module\Config\ModuleConfig;
+use Skyline\Kernel\Loader\LoaderInterface;
+use TASoft\Config\Config;
 
-class ModuleCompiler extends AbstractCompiler
+class ModuleLoader implements LoaderInterface
 {
-    public function compile(CompilerContext $context)
+    public function __construct()
     {
-        foreach($context->getSourceCodeManager()->yieldSourceFiles("/^module\.cfg\.php$/i") as $moduleFile) {
-            $config = require $moduleFile;
-            if(!isset($config[ ModuleConfig::MODULE_NAME ])) {
-                $config[ ModuleConfig::MODULE_NAME ] = basename(dirname($moduleFile));
-            }
+    }
 
-            print_r($config);
-        }
+    public function bootstrap(Config $configuration)
+    {
+
     }
 }

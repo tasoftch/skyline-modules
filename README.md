@@ -15,6 +15,10 @@ A module can specifically extend this information by module specific infos.
         PHP classes used as controllers or whatever.
     - ```Components/```  
         Components that the main layout render includes into the final page.
+    - ```Config/```  
+        Configurations
     - ```Templates/```  
         Template information
-    - ``````
+
+#### Declaring modules
+You can declare any directory as a module if there is a file named ```module.cfg.php```.

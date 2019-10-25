@@ -21,24 +21,11 @@
  * SOFTWARE.
  */
 
-namespace Skyline\Module\Compiler;
+use Skyline\Kernel\Config\MainKernelConfig;
+use Skyline\Module\Loader\ModuleLoader;
 
-
-use Skyline\Compiler\AbstractCompiler;
-use Skyline\Compiler\CompilerContext;
-use Skyline\Module\Config\ModuleConfig;
-
-class ModuleCompiler extends AbstractCompiler
-{
-    public function compile(CompilerContext $context)
-    {
-        foreach($context->getSourceCodeManager()->yieldSourceFiles("/^module\.cfg\.php$/i") as $moduleFile) {
-            $config = require $moduleFile;
-            if(!isset($config[ ModuleConfig::MODULE_NAME ])) {
-                $config[ ModuleConfig::MODULE_NAME ] = basename(dirname($moduleFile));
-            }
-
-            print_r($config);
-        }
-    }
-}
+return [
+    MainKernelConfig::CONFIG_LOADERS => [
+        'modules' => ModuleLoader::class
+    ]
+];
