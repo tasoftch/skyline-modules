@@ -42,6 +42,9 @@ class ModuleConfig
     const CONFIG_COMPONENTS_DIRECTORY_NAME = 'components-directory';
     const CONFIG_TEMPLATES_DIRECTORY_NAME = 'templates-directory';
 
+    /** @var string The deciders for a module, can be listed as class names or arrays, where the array's first element must be the class name and any further element is passed as argument. Please note that no services and parameters are available yet! */
+    const MODULE_DECIDER_CLASSES = 'decider-classess';
+
     protected static $defaults = [
         self::CONFIG_SERVICES => [],
         self::CONFIG_LOCATIONS => [],

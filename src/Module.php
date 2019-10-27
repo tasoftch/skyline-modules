@@ -103,4 +103,17 @@ class Module implements ModuleInterface
     {
         return $this->routingTable;
     }
+
+    public function unserialize($serialized) {
+        list(
+            $this->locations,
+            $this->services,
+            $this->parameters,
+            $this->classesDirectory,
+            $this->classPrefix,
+            $this->componentsDirectory,
+            $this->templatesDirectory,
+            $this->routingTable
+            ) = unserialize($serialized);
+    }
 }
