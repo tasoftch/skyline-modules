@@ -25,13 +25,20 @@ namespace Skyline\Module\Compiler;
 
 
 use DirectoryIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Skyline\Compiler\AbstractCompiler;
 use Skyline\Compiler\CompilerConfiguration;
 use Skyline\Compiler\CompilerContext;
+use Skyline\Compiler\Context\Code\SourceFile;
+use Skyline\HTMLRender\Compiler\FindHTMLTemplatesCompiler;
 use Skyline\Module\Config\ModuleConfig;
+use Skyline\Render\Compiler\FindTemplatesCompiler;
 
 class ModuleCompiler extends AbstractCompiler
 {
+    private $templates;
+
     public function compile(CompilerContext $context)
     {
         $modules = [];
@@ -45,6 +52,7 @@ class ModuleCompiler extends AbstractCompiler
 
         $configFiles = $this->_findCompiledConfigFiles($context);
 
+        $moduleTemplates = [];
 
         foreach($context->getSourceCodeManager()->yieldSourceFiles("/^module\.cfg\.php$/i") as $moduleFile) {
             $config = require $moduleFile;
@@ -81,12 +89,26 @@ class ModuleCompiler extends AbstractCompiler
                 }
             }
 
+            $this->templates = [];
+            $this->compileIncludedTemplates($modPath, $mn, $context);
 
-            $modules[ $config[ ModuleConfig::MODULE_NAME ] ] = $config;
+            if($this->templates) {
+                $moduleTemplates[$mn] = $this->templates;
+            }
+
+            $modules[ $config[ $mn ] ] = $config;
         }
 
 
         $dir = $context->getSkylineAppDirectory( CompilerConfiguration::SKYLINE_DIR_COMPILED );
+
+
+        if($moduleTemplates) {
+            if(is_file($f = "$dir/templates.config.php")) {
+                $this->_createDynamicConfiguredFile($dir, 'templates.config.php', $moduleTemplates);
+            }
+        }
+
 
         foreach($dynamicConfigurations as $fileName => $dynamicConfiguration) {
             $this->_createDynamicConfiguredFile($dir, $fileName, $dynamicConfiguration);
@@ -137,5 +159,25 @@ return ModuleLoader::dynamicallyCompile(function() {
 $code}, $data);";
 
         file_put_contents( $compiledDir . DIRECTORY_SEPARATOR . $fileName, $content );
+    }
+
+    private function compileIncludedTemplates($moduleDirectory, $moduleName, $context) {
+        static $templateCompilers = [];
+        if(!$templateCompilers) {
+            $templateCompilers = [
+                new FindTemplatesCompiler('module-templates'),
+                new FindHTMLTemplatesCompiler('module-html-templates')
+            ];
+        }
+
+        foreach(new RecursiveIteratorIterator( new RecursiveDirectoryIterator($moduleDirectory, RecursiveDirectoryIterator::FOLLOW_SYMLINKS| RecursiveDirectoryIterator::SKIP_DOTS) ) as $item) {
+            /** @var FindTemplatesCompiler $compiler */
+            foreach($templateCompilers as $compiler) {
+                if(preg_match( $compiler->getTemplateFilenamePattern(), basename($item) )) {
+                    $src = new SourceFile($item);
+                    $compiler->compileTemplate($src, $this->templates, $context);
+                }
+            }
+        }
     }
 }

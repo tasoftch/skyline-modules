@@ -89,8 +89,12 @@ class ModuleLoader implements LoaderInterface
      */
     public static function dynamicallyCompile(callable $originalConfiguration, $additionalConfiguration) {
         if($mn = static::getModuleName()) {
-            if(is_file($configFile = $additionalConfiguration[ $mn ] ?? NULL))
-                $config = new Config( require $configFile );
+            $config = $additionalConfiguration[ $mn ] ?? NULL;
+
+            if(@is_file($config))
+                $config = new Config( require $config );
+            else
+                $config = new Config( $config );
         }
 
         if(isset($config)) {
