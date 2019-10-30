@@ -93,9 +93,9 @@ class ModuleLoader implements LoaderInterface
         if($mn = static::getModuleName()) {
             $config = $additionalConfiguration[ $mn ] ?? NULL;
 
-            if(@is_file($config))
+            if(is_string($config) && is_file($config))
                 $config = new Config( require $config );
-            else
+            elseif(is_iterable($config))
                 $config = new Config( $config );
         }
 
