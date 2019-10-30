@@ -79,19 +79,26 @@ class ModuleLoader implements LoaderInterface
         return self::$moduleName;
     }
 
-
+    /**
+     * Directly used in config files to apply additional configuration for modules.
+     *
+     * @param callable $originalConfiguration
+     * @param $additionalConfiguration
+     * @return array
+     * @internal
+     */
     public static function dynamicallyCompile(callable $originalConfiguration, $additionalConfiguration) {
         if($mn = static::getModuleName()) {
             if(is_file($configFile = $additionalConfiguration[ $mn ] ?? NULL))
                 $config = new Config( require $configFile );
         }
 
-        $originalConfiguration = new Config( $originalConfiguration() );
-
         if(isset($config)) {
+            $originalConfiguration = new Config( $originalConfiguration() );
             $originalConfiguration->merge( $config );
+            return $originalConfiguration->toArray(true);
         }
 
-        return $originalConfiguration->toArray(true);
+        return $originalConfiguration();
     }
 }
