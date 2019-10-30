@@ -45,11 +45,13 @@ class ModuleLoader implements LoaderInterface
             /** @var Request $request */
             $request = RequestLoader::$request;
 
-            foreach($moduleApplyers as $moduleName => $applyer) {
-                if($applyer = $this->createApplyer($applyer)) {
-                    if($applyer->acceptFromRequest($request, $moduleName)) {
-                        self::$moduleName = $moduleName;
-                        break;
+            foreach($moduleApplyers as $moduleName => $applyers) {
+                foreach($applyers as $applyer) {
+                    if($applyer = $this->createApplyer($applyer)) {
+                        if($applyer->acceptFromRequest($request, $moduleName)) {
+                            self::$moduleName = $moduleName;
+                            break;
+                        }
                     }
                 }
             }
