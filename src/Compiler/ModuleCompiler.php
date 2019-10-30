@@ -96,7 +96,7 @@ class ModuleCompiler extends AbstractCompiler
                 $moduleTemplates[$mn] = $this->templates;
             }
 
-            $modules[ $config[ $mn ] ] = $config;
+            $modules[  $mn ] = $config;
         }
 
 
