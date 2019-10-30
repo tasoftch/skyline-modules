@@ -129,6 +129,8 @@ class ModuleCompiler extends AbstractCompiler
             if(preg_match("/^\w+\.config\.php$/i", $item)) {
                 if(stripos($item, 'main.config.php') === 0)
                     continue;
+                if(stripos($item, 'routing.config.php') === 0)
+                    continue;
                 $items[] = (string) $item;
             }
         }
