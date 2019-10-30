@@ -24,7 +24,9 @@
 namespace Skyline\Module\Compiler;
 
 
+use DirectoryIterator;
 use Skyline\Compiler\AbstractCompiler;
+use Skyline\Compiler\CompilerConfiguration;
 use Skyline\Compiler\CompilerContext;
 use Skyline\Module\Config\ModuleConfig;
 
@@ -32,13 +34,108 @@ class ModuleCompiler extends AbstractCompiler
 {
     public function compile(CompilerContext $context)
     {
+        $modules = [];
+        $applyers = [];
+
+        $services = [];
+        $locations = [];
+
+        $dynamicConfigurations = [];
+
+
+        $configFiles = $this->_findCompiledConfigFiles($context);
+
+
         foreach($context->getSourceCodeManager()->yieldSourceFiles("/^module\.cfg\.php$/i") as $moduleFile) {
             $config = require $moduleFile;
             if(!isset($config[ ModuleConfig::MODULE_NAME ])) {
                 $config[ ModuleConfig::MODULE_NAME ] = basename(dirname($moduleFile));
             }
 
-            print_r($config);
+            $config[ ModuleConfig::COMPILED_MODULE_PATH ] = $context->getRelativeProjectPath( $modPath = realpath( dirname($moduleFile) ) );
+            $mn = $config[ModuleConfig::MODULE_NAME];
+
+            if($cp = $config[ ModuleConfig::CLASS_DIRECTORY_NAME ] ?? NULL)
+                $config[ ModuleConfig::CLASS_DIRECTORY_NAME ] = $context->getRelativeProjectPath( $cp );
+
+
+            if($apply = $config[ ModuleConfig::MODULE_DECIDER_CLASSES ] ?? NULL) {
+                foreach ($apply as $a)
+                    $applyers[$mn][] = $a;
+            } else {
+                trigger_error(sprintf("** Module %s is without deciders, so it will never be applyed", $config[ModuleConfig::MODULE_NAME]), E_USER_WARNING);
+                continue;
+            }
+
+            // Register custom configuration
+            if(is_file($f = $modPath.DIRECTORY_SEPARATOR."services.config.php")) {
+                $services[ $mn ] = $config[ ModuleConfig::COMPILED_SERVICE_CONFIG_PATH ] = $context->getRelativeProjectPath( realpath($f) );
+            }
+            if(is_file($f = $modPath.DIRECTORY_SEPARATOR."locations.config.php")) {
+                $locations[ $mn ] = $config[ ModuleConfig::COMPILED_LOCATION_CONFIG_PATH ] = $context->getRelativeProjectPath( realpath($f) );
+            }
+
+            foreach($configFiles as $cfgFile) {
+                if(is_file($f = $modPath.DIRECTORY_SEPARATOR.$cfgFile)) {
+                    $dynamicConfigurations[$cfgFile][$mn] = $context->getRelativeProjectPath( realpath($f) );
+                }
+            }
+
+
+            $modules[ $config[ ModuleConfig::MODULE_NAME ] ] = $config;
         }
+
+
+        $dir = $context->getSkylineAppDirectory( CompilerConfiguration::SKYLINE_DIR_COMPILED );
+
+        foreach($dynamicConfigurations as $fileName => $dynamicConfiguration) {
+            $this->_createDynamicConfiguredFile($dir, $fileName, $dynamicConfiguration);
+        }
+
+        $data = var_export($applyers, true);
+        $data = '<?php
+  return ' . $data . ";";
+
+        file_put_contents($dir.DIRECTORY_SEPARATOR."modules.config.php", $data);
+    }
+
+    private function _findCompiledConfigFiles(CompilerContext $context) {
+        $items = ['plugins.php'];
+
+        $dir = $context->getSkylineAppDirectory( CompilerConfiguration::SKYLINE_DIR_COMPILED );
+        foreach(new DirectoryIterator($dir) as $item) {
+            if(preg_match("/^\w+\.config\.php$/i", $item)) {
+                if(stripos($item, 'main.config.php') === 0)
+                    continue;
+                $items[] = (string) $item;
+            }
+        }
+        return $items;
+    }
+
+
+    private function _createDynamicConfiguredFile($compiledDir, $fileName, $dynamicConfig) {
+        $code = "";
+        foreach(token_get_all( file_get_contents( $compiledDir . DIRECTORY_SEPARATOR . $fileName ) ) as $token) {
+            if(is_array($token)) {
+                if($token[0] == T_OPEN_TAG || $token[0] == T_CLOSE_TAG)
+                    continue;
+                $token = $token[1];
+            }
+
+            $code .= $token;
+        }
+
+        if(!preg_match("/;\s*$/i", $code))
+            $code .= ";";
+
+        $data = var_export( $dynamicConfig, true );
+
+        $content = "<?php
+use Skyline\\Module\\Loader\\ModuleLoader;
+return ModuleLoader::dynamicallyCompile(function() {
+$code}, $data);";
+
+        file_put_contents( $compiledDir . DIRECTORY_SEPARATOR . $fileName, $content );
     }
 }

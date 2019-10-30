@@ -31,39 +31,17 @@ namespace Skyline\Module\Config;
  */
 class ModuleConfig
 {
-    const MODULE_NAME = 'module-name';  // Required! Without this key the module is not registered.
+    const MODULE_NAME = 'module-name';      // Manual or compiled (would be directory name)
+    const COMPILED_MODULE_PATH = 'module-path';      // Compiled
 
-    const CONFIG_LOCATIONS = 'locations';
-    const CONFIG_PARAMETERS = 'parameters';
-    const CONFIG_SERVICES = 'services';
-
-    const CONFIG_CLASS_DIRECTORY_NAME = 'class-directory';
-    const CONFIG_CLASS_PREFIX = 'class-prefix';
-    const CONFIG_COMPONENTS_DIRECTORY_NAME = 'components-directory';
-    const CONFIG_TEMPLATES_DIRECTORY_NAME = 'templates-directory';
+    const CLASS_DIRECTORY_NAME = 'class-directory'; // Manual
+    const CLASS_PREFIX = 'class-prefix';            // Manual
 
     /** @var string The deciders for a module, can be listed as class names or arrays, where the array's first element must be the class name and any further element is passed as argument. Please note that no services and parameters are available yet! */
     const MODULE_DECIDER_CLASSES = 'decider-classess';
 
-    protected static $defaults = [
-        self::CONFIG_SERVICES => [],
-        self::CONFIG_LOCATIONS => [],
-        self::CONFIG_PARAMETERS => [],
 
-        self::CONFIG_CLASS_DIRECTORY_NAME => 'Classes',
-        self::CONFIG_COMPONENTS_DIRECTORY_NAME => 'Components',
-        self::CONFIG_TEMPLATES_DIRECTORY_NAME => 'Templates',
-    ];
-
-
-    /**
-     * Helper method to define default values
-     *
-     * @param string $key
-     * @param null $default
-     * @return mixed|null
-     */
-    public static function getDefault(string $key, $default = NULL) {
-        return static::$defaults[ $key ] ?? $default;
-    }
+    const COMPILED_SERVICE_CONFIG_PATH = 'sc-path';
+    const COMPILED_LOCATION_CONFIG_PATH = 'lc-path';
+    const COMPILED_PARAMETERS_CONFIG_PATH = 'ptr-path';
 }

@@ -25,16 +25,72 @@ namespace Skyline\Module\Loader;
 
 
 use Skyline\Kernel\Loader\LoaderInterface;
+use Skyline\Module\Compiler\Decider\DeciderInterface;
+use Symfony\Component\HttpFoundation\Request;
 use TASoft\Config\Config;
 
 class ModuleLoader implements LoaderInterface
 {
+    private static $moduleName;
+
     public function __construct()
     {
     }
 
     public function bootstrap(Config $configuration)
     {
+        if($md = SkyGetPath( "$(C)/modules.config.php")) {
+            $moduleApplyers = require $md;
+            /** @var Request $request */
+            $request = NULL; // TODO: Get request
 
+            foreach($moduleApplyers as $moduleName => $applyer) {
+                if($applyer = $this->createApplyer($applyer)) {
+                    if($applyer->acceptFromRequest($request, $moduleName)) {
+                        self::$moduleName = $moduleName;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private function createApplyer($applyer): ?DeciderInterface {
+        if(is_string($applyer)) {
+            return new $applyer();
+        }
+
+        if(is_object($applyer) && is_iterable($applyer))
+            $applyer = iterator_to_array( $applyer );
+
+        if(is_array($applyer)) {
+            $class = array_shift($applyer);
+            return new $class( ...array_values($applyer) );
+        }
+        return NULL;
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getModuleName()
+    {
+        return self::$moduleName;
+    }
+
+
+    public static function dynamicallyCompile(callable $originalConfiguration, $additionalConfiguration) {
+        if($mn = static::getModuleName()) {
+            if(is_file($configFile = $additionalConfiguration[ $mn ] ?? NULL))
+                $config = new Config( require $configFile );
+        }
+
+        $originalConfiguration = new Config( $originalConfiguration() );
+
+        if(isset($config)) {
+            $originalConfiguration->merge( $config );
+        }
+
+        return $originalConfiguration->toArray(true);
     }
 }
