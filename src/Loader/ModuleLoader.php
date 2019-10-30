@@ -33,9 +33,18 @@ use TASoft\Config\Config;
 class ModuleLoader implements LoaderInterface
 {
     private static $moduleName;
+    private static $moduleInformation;
 
     public function __construct()
     {
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getModuleInformation()
+    {
+        return self::$moduleInformation;
     }
 
     public function bootstrap(Config $configuration)
@@ -45,11 +54,12 @@ class ModuleLoader implements LoaderInterface
             /** @var Request $request */
             $request = RequestLoader::$request;
 
-            foreach($moduleApplyers as $moduleName => $applyers) {
+            foreach($moduleApplyers["#"] as $moduleName => $applyers) {
                 foreach($applyers as $applyer) {
                     if($applyer = $this->createApplyer($applyer)) {
                         if($applyer->acceptFromRequest($request, $moduleName)) {
                             self::$moduleName = $moduleName;
+                            self::$moduleInformation = $moduleApplyers["@"][$moduleName] ?? NULL;
                             break;
                         }
                     }

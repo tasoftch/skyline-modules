@@ -114,7 +114,7 @@ class ModuleCompiler extends AbstractCompiler
             $this->_createDynamicConfiguredFile($dir, $fileName, $dynamicConfiguration);
         }
 
-        $data = var_export($applyers, true);
+        $data = var_export(['#' => $applyers, '@' => $modules], true);
         $data = '<?php
   return ' . $data . ";";
 
