@@ -24,9 +24,11 @@
 namespace Skyline\Module\Loader;
 
 
+use Composer\Autoload\ClassLoader;
 use Skyline\Kernel\Loader\LoaderInterface;
 use Skyline\Kernel\Loader\RequestLoader;
 use Skyline\Module\Compiler\Decider\DeciderInterface;
+use Skyline\Module\Config\ModuleConfig;
 use Symfony\Component\HttpFoundation\Request;
 use TASoft\Config\Config;
 
@@ -34,6 +36,8 @@ class ModuleLoader implements LoaderInterface
 {
     private static $moduleName;
     private static $moduleInformation;
+    /** @var ClassLoader|null */
+    private static $moduleClassLoader;
 
     public function __construct()
     {
@@ -45,6 +49,14 @@ class ModuleLoader implements LoaderInterface
     public static function getModuleInformation()
     {
         return self::$moduleInformation;
+    }
+
+    /**
+     * @return ClassLoader|null
+     */
+    public static function getModuleClassLoader(): ?ClassLoader
+    {
+        return self::$moduleClassLoader;
     }
 
     public function bootstrap(Config $configuration)
@@ -60,11 +72,30 @@ class ModuleLoader implements LoaderInterface
                         if($applyer->acceptFromRequest($request, $moduleName)) {
                             self::$moduleName = $moduleName;
                             self::$moduleInformation = $moduleApplyers["@"][$moduleName] ?? NULL;
+
+                            if(isset(self::$moduleInformation[ ModuleConfig::CLASS_DIRECTORY_NAME ])) {
+                                $this->_linkPHPClassDirectory(
+                                    self::$moduleInformation[ ModuleConfig::CLASS_DIRECTORY_NAME ],
+                                    self::$moduleInformation[ ModuleConfig::CLASS_PREFIX ] ?? NULL
+                                );
+                            }
+
                             break;
                         }
                     }
                 }
             }
+        }
+    }
+
+    private function _linkPHPClassDirectory($dir, $prefix) {
+        if($prefix) {
+            if(substr($prefix, -1) != '\\')
+                $prefix .= '\\';
+
+            self::$moduleClassLoader = new ClassLoader();
+            self::$moduleClassLoader->addPsr4($prefix, [$dir]);
+            self::$moduleClassLoader->register();
         }
     }
 
