@@ -25,6 +25,7 @@ namespace Skyline\Module\Loader;
 
 
 use Skyline\Kernel\Loader\LoaderInterface;
+use Skyline\Kernel\Loader\RequestLoader;
 use Skyline\Module\Compiler\Decider\DeciderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use TASoft\Config\Config;
@@ -42,7 +43,7 @@ class ModuleLoader implements LoaderInterface
         if($md = SkyGetPath( "$(C)/modules.config.php")) {
             $moduleApplyers = require $md;
             /** @var Request $request */
-            $request = NULL; // TODO: Get request
+            $request = RequestLoader::$request;
 
             foreach($moduleApplyers as $moduleName => $applyer) {
                 if($applyer = $this->createApplyer($applyer)) {
