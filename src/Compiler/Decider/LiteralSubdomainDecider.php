@@ -23,24 +23,29 @@
 
 namespace Skyline\Module\Compiler\Decider;
 
-use Symfony\Component\HttpFoundation\Request;
 
-/**
- * Interface DeciderInterface
- *
- * The decider is called BEFORE bootstrapping the application and it has to decide upon a request, if a module should be activated or not.
- *
- *
- * @package Skyline\Module\Compiler\Decider
- */
-interface DeciderInterface
+class LiteralSubdomainDecider extends AbstractSubdomainDecider
 {
+    private $subdomain;
+
+    public function __construct(string $subdomain, int $normalize = 0, string $URIPrefix = "")
+    {
+        parent::__construct($normalize, $URIPrefix);
+        $this->subdomain = $subdomain;
+    }
+
     /**
-     * A module decider should return true, if the request requires this module.
-     *
-     * @param Request $request      Current request to decide about
-     * @param string $moduleName    Asking module to decide for
-     * @return bool
+     * @return mixed
      */
-    public function acceptFromRequest(Request $request, string $moduleName): bool;
+    public function getSubdomain()
+    {
+        return $this->subdomain;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function matchSubdomain($subdomains, $moduleName): bool {
+        return strcasecmp($this->getSubdomain(), array_pop($subdomains)) === 0 ? true : false;
+    }
 }

@@ -23,24 +23,37 @@
 
 namespace Skyline\Module\Compiler\Decider;
 
+
+use Skyline\Module\Compiler\RequestNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * Interface DeciderInterface
- *
- * The decider is called BEFORE bootstrapping the application and it has to decide upon a request, if a module should be activated or not.
- *
- *
- * @package Skyline\Module\Compiler\Decider
- */
-interface DeciderInterface
+class RegexURIPrefixDecider extends LiteralURIPrefixDecider
 {
+    private $replacement;
+
+    public function __construct($URIPrefix, $replacement = "")
+    {
+        parent::__construct($URIPrefix);
+        $this->replacement = $replacement;
+    }
+
+    public function acceptFromRequest(Request $request, string $moduleName): bool
+    {
+        $uri = $request->getRequestUri();
+        if(preg_match($this->getURIPrefix(), $uri)) {
+            if($repl = $this->getReplacement()) {
+                return RequestNormalizer::normalizeRequestByReplacingURI($request, $this->getURIPrefix(), $repl);
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
-     * A module decider should return true, if the request requires this module.
-     *
-     * @param Request $request      Current request to decide about
-     * @param string $moduleName    Asking module to decide for
-     * @return bool
+     * @return string
      */
-    public function acceptFromRequest(Request $request, string $moduleName): bool;
+    public function getReplacement(): string
+    {
+        return $this->replacement;
+    }
 }
