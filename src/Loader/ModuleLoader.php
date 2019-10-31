@@ -80,7 +80,7 @@ class ModuleLoader implements LoaderInterface
                                 );
                             }
 
-                            break;
+                            break 2;
                         }
                     }
                 }

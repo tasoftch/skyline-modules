@@ -31,7 +31,7 @@ class RegexURIPrefixDecider extends LiteralURIPrefixDecider
 {
     private $replacement;
 
-    public function __construct(int $normalize = 0, string $URIPrefix = "", $replacement = "")
+    public function __construct(int $normalize = 0, string $URIPrefix = "", $replacement = false)
     {
         parent::__construct($normalize, $URIPrefix);
         $this->replacement = $replacement;
@@ -41,7 +41,7 @@ class RegexURIPrefixDecider extends LiteralURIPrefixDecider
     {
         $uri = $request->getRequestUri();
         if(preg_match($this->getURIPrefix(), $uri)) {
-            if($repl = $this->getReplacement()) {
+            if(false !== ($repl = $this->getReplacement())) {
                 return RequestNormalizer::normalizeRequestByReplacingURI($request, $this->getURIPrefix(), $repl);
             }
             return true;
