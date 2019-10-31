@@ -24,7 +24,9 @@
 namespace Skyline\Module\Compiler\Decider;
 
 
-class LiteralSubdomainDecider extends AbstractSubdomainDecider
+use Symfony\Component\HttpFoundation\Request;
+
+class LiteralSubdomainDecider extends AbstractNormalizingDecider
 {
     private $subdomain;
 
@@ -45,7 +47,20 @@ class LiteralSubdomainDecider extends AbstractSubdomainDecider
     /**
      * @inheritDoc
      */
-    protected function matchSubdomain($subdomains, $moduleName): bool {
+    protected function getComparisonValue(Request $request, string $moduleName)
+    {
+        $host = $request->getHost();
+        $hd = explode(".", $host);
+        array_pop($hd);
+        array_pop($hd);
+        return $hd;
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function matchComparisonValue($subdomains, $moduleName): bool {
         return strcasecmp($this->getSubdomain(), array_pop($subdomains)) === 0 ? true : false;
     }
 }

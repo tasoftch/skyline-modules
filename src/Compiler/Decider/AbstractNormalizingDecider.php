@@ -27,7 +27,7 @@ namespace Skyline\Module\Compiler\Decider;
 use Skyline\Module\Compiler\RequestNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class AbstractSubdomainDecider implements DeciderInterface
+abstract class AbstractNormalizingDecider implements DeciderInterface
 {
     const NORMALIZE_TO_HAVE_URI = 1;
     const NORMALIZE_TO_NOT_HAVE_URI = 2;
@@ -65,12 +65,9 @@ abstract class AbstractSubdomainDecider implements DeciderInterface
 
     public function acceptFromRequest(Request $request, string $moduleName): bool
     {
-        $host = $request->getHost();
-        $hd = explode(".", $host);
-        array_pop($hd);
-        array_pop($hd);
+        $cv = $this->getComparisonValue($request, $moduleName);
 
-        if($this->matchSubdomain($hd, $moduleName)) {
+        if($this->matchComparisonValue($cv, $moduleName)) {
             if($prefix = $this->getURIPrefix()) {
                 switch ($this->getNormalize()) {
                     case static::NORMALIZE_TO_HAVE_URI:
@@ -88,6 +85,15 @@ abstract class AbstractSubdomainDecider implements DeciderInterface
     }
 
     /**
+     * Creates a comparison value
+     *
+     * @param Request $request
+     * @param string $moduleName
+     * @return mixed
+     */
+    abstract protected function getComparisonValue(Request $request, string $moduleName);
+
+    /**
      * Called to determine if the subdomains match.
      * The subdomains are passed as array like:
      *  - www.tasoft.ch => [www],
@@ -98,5 +104,5 @@ abstract class AbstractSubdomainDecider implements DeciderInterface
      * @param string $moduleName
      * @return bool
      */
-    abstract protected function matchSubdomain($subdomains, $moduleName): bool;
+    abstract protected function matchComparisonValue($subdomains, $moduleName): bool;
 }

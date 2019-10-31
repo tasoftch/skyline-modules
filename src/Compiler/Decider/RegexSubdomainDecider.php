@@ -26,7 +26,7 @@ namespace Skyline\Module\Compiler\Decider;
 
 class RegexSubdomainDecider extends LiteralSubdomainDecider
 {
-    protected function matchSubdomain($subdomains, $moduleName): bool
+    protected function matchComparisonValue($subdomains, $moduleName): bool
     {
         $sd = array_pop($subdomains);
         return preg_match($this->getSubdomain(), $sd) ? true : false;

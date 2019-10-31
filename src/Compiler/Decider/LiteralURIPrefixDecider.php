@@ -26,33 +26,20 @@ namespace Skyline\Module\Compiler\Decider;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class LiteralURIPrefixDecider implements DeciderInterface
+class LiteralURIPrefixDecider extends AbstractNormalizingDecider
 {
-    private $URIPrefix;
-
     /**
-     * LiteralURIPrefixDecider constructor.
-     * @param $URIPrefix
+     * @param string $uri
+     * @param string $moduleName
+     * @return bool
      */
-    public function __construct($URIPrefix)
+    protected function matchComparisonValue($uri, $moduleName): bool
     {
-        $this->URIPrefix = $URIPrefix;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getURIPrefix()
-    {
-        return $this->URIPrefix;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function acceptFromRequest(Request $request, string $moduleName): bool
-    {
-        $uri = $request->getRequestUri();
         return stripos($uri, $this->getURIPrefix()) === 0 ? true : false;
+    }
+
+    protected function getComparisonValue(Request $request, string $moduleName)
+    {
+        return $request->getRequestUri();
     }
 }
