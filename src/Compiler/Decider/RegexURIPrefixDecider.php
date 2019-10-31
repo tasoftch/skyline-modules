@@ -31,9 +31,9 @@ class RegexURIPrefixDecider extends LiteralURIPrefixDecider
 {
     private $replacement;
 
-    public function __construct($URIPrefix, $replacement = "")
+    public function __construct(int $normalize = 0, string $URIPrefix = "", $replacement = "")
     {
-        parent::__construct($URIPrefix);
+        parent::__construct($normalize, $URIPrefix);
         $this->replacement = $replacement;
     }
 
