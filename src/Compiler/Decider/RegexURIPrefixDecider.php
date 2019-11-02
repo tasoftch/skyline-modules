@@ -50,9 +50,9 @@ class RegexURIPrefixDecider extends LiteralURIPrefixDecider
     }
 
     /**
-     * @return string
+     * @return string|false
      */
-    public function getReplacement(): string
+    public function getReplacement()
     {
         return $this->replacement;
     }
