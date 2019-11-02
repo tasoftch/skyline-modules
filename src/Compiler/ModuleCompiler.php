@@ -31,9 +31,12 @@ use Skyline\Compiler\AbstractCompiler;
 use Skyline\Compiler\CompilerConfiguration;
 use Skyline\Compiler\CompilerContext;
 use Skyline\Compiler\Context\Code\SourceFile;
+use Skyline\HTMLRender\Compiler\ConfigCompilerHelper;
 use Skyline\HTMLRender\Compiler\FindHTMLTemplatesCompiler;
 use Skyline\Module\Config\ModuleConfig;
 use Skyline\Render\Compiler\FindTemplatesCompiler;
+use TASoft\Config\Compiler\Source\FileSource;
+use TASoft\Config\Compiler\Target\InMemoryTarget;
 
 class ModuleCompiler extends AbstractCompiler
 {
@@ -85,7 +88,11 @@ class ModuleCompiler extends AbstractCompiler
 
             foreach($configFiles as $cfgFile) {
                 if(is_file($f = $modPath.DIRECTORY_SEPARATOR.$cfgFile)) {
-                    $dynamicConfigurations[$cfgFile][$mn] = $context->getRelativeProjectPath( realpath($f) );
+                    $target = new InMemoryTarget($cfg, $files);
+                    $compiler = new ConfigCompilerHelper($target);
+                    $compiler->setSource( new FileSource($f) );
+                    $compiler->compile();
+                    $dynamicConfigurations[$cfgFile][$mn] = $cfg->toArray(true);
                 }
             }
 
