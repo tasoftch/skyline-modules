@@ -44,4 +44,7 @@ class ModuleConfig
     const COMPILED_SERVICE_CONFIG_PATH = 'sc-path';
     const COMPILED_LOCATION_CONFIG_PATH = 'lc-path';
     const COMPILED_PARAMETERS_CONFIG_PATH = 'ptr-path';
+
+    // Set this key to true and the module loader will only load the module configurations except the main configuration.
+    const COMPILED_IGNORE_DEFAULT = 'ignore-def';
 }

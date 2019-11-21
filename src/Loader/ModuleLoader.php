@@ -36,6 +36,8 @@ class ModuleLoader implements LoaderInterface
 {
     private static $moduleName;
     private static $moduleInformation;
+    /** @var bool */
+    private static $ignoringDefault;
     /** @var ClassLoader|null */
     private static $moduleClassLoader;
 
@@ -59,6 +61,16 @@ class ModuleLoader implements LoaderInterface
         return self::$moduleClassLoader;
     }
 
+    /**
+     * Returns true, if the module does not want to preload the default configurations
+     *
+     * @return bool
+     */
+    public static function isIgnoringDefault(): bool
+    {
+        return self::$ignoringDefault;
+    }
+
     public function bootstrap(Config $configuration)
     {
         if($md = SkyGetPath( "$(C)/modules.config.php")) {
@@ -72,6 +84,7 @@ class ModuleLoader implements LoaderInterface
                         if($applyer->acceptFromRequest($request, $moduleName)) {
                             self::$moduleName = $moduleName;
                             self::$moduleInformation = $moduleApplyers["@"][$moduleName] ?? NULL;
+                            self::$ignoringDefault = isset(self::$moduleInformation[ ModuleConfig::COMPILED_IGNORE_DEFAULT ]) && self::$moduleInformation[ ModuleConfig::COMPILED_IGNORE_DEFAULT ] ? true : false;
 
                             if(isset(self::$moduleInformation[ ModuleConfig::CLASS_DIRECTORY_NAME ])) {
                                 $this->_linkPHPClassDirectory(
@@ -134,10 +147,20 @@ class ModuleLoader implements LoaderInterface
         if($mn = static::getModuleName()) {
             $config = $additionalConfiguration[ $mn ] ?? NULL;
 
-            if(is_string($config) && is_file($config))
-                $config = new Config( require $config );
-            elseif(is_iterable($config))
-                $config = new Config( $config );
+            if(static::isIgnoringDefault()) {
+                if(is_string($config) && is_file($config))
+                    return require $config;
+                if(is_iterable($config) && !is_array($config))
+                    return iterator_to_array($config);
+                if(is_array($config))
+                    return $config;
+                return [];
+            } else {
+                if(is_string($config) && is_file($config))
+                    $config = new Config( require $config );
+                elseif(is_iterable($config))
+                    $config = new Config( $config );
+            }
         }
 
         if(isset($config)) {
