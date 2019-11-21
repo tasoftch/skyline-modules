@@ -47,4 +47,9 @@ class ModuleConfig
 
     // Set this key to true and the module loader will only load the module configurations except the main configuration.
     const COMPILED_IGNORE_DEFAULT = 'ignore-def';
+
+
+    // Every routing that routes to a controller must specify a module name. If the current module matches or is not set, then the action is available.
+    // Specifying this option disables this behaviour and include all other routings too.
+    const COMPILED_INCLUDE_DEFAULT_ROUTINGS = 'include-def-routings';
 }
