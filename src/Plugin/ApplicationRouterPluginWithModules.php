@@ -34,16 +34,16 @@ class ApplicationRouterPluginWithModules extends ApplicationRouterPlugin
 {
     protected function getRouterForSection(string $section, array $contents, int &$priority): ?RouterInterface
     {
-        static $moduleName = NULL;
-        NULL === $moduleName && $moduleName = ModuleLoader::getModuleInformation()[ ModuleConfig::MODULE_NAME ] ?? false;
+        static $moduleInfo = NULL;
+        NULL === $moduleInfo && ($moduleInfo = ModuleLoader::getModuleInformation() ?: false);
 
-        if($moduleName) {
+        if($moduleInfo && (!isset($moduleInfo[ModuleConfig::COMPILED_INCLUDE_DEFAULT_ROUTINGS]) || !$moduleInfo[ModuleConfig::COMPILED_INCLUDE_DEFAULT_ROUTINGS])) {
             $newContents = [];
             foreach($contents as $key => $value) {
                 if(isset( $value[ AbstractRouterPlugin::ROUTED_CONTROLLER_KEY ] )) {
                     // Any route to a controller must specify the current module
 
-                    if($moduleName == ($value[ AbstractRouterPlugin::ROUTED_MODULE_KEY ] ?? '########'))
+                    if($moduleInfo[ModuleConfig::MODULE_NAME] == ($value[ AbstractRouterPlugin::ROUTED_MODULE_KEY ] ?? '########'))
                         $newContents[$key] = $value;
                 } else {
                     $newContents[$key] = $value;
