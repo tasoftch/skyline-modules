@@ -1,7 +1,6 @@
 {
   "name": "skyline/modules",
   "license": "BSD-3-Clause",
-  "minimum-stability": "dev",
   "authors": [
     {
       "name": "Thomas Abplanalp",
@@ -15,11 +14,11 @@
   },
   "require" : {
     "php": "^7.2",
-    "skyline/html-render": "dev-master"
+    "skyline/html-render": "^0.8"
   },
   "require-dev": {
     "phpunit/phpunit": "^6",
-    "skyline/compiler": "dev-master",
-    "skyline/core-application": "dev-master"
+    "skyline/compiler": "^0.8",
+    "skyline/core-application": "^0.8"
   }
 }
