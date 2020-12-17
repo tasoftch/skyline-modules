@@ -182,10 +182,13 @@ $code}, $data);";
         foreach(new RecursiveIteratorIterator( new RecursiveDirectoryIterator($moduleDirectory, RecursiveDirectoryIterator::FOLLOW_SYMLINKS| RecursiveDirectoryIterator::SKIP_DOTS) ) as $item) {
             /** @var FindTemplatesCompiler $compiler */
             foreach($templateCompilers as $compiler) {
-                if(preg_match( $compiler->getTemplateFilenamePattern(), basename($item) )) {
-                    $src = new SourceFile($item);
-                    $compiler->compileTemplate($src, $this->templates, $context);
-                }
+				if(preg_match( $compiler->getTemplateFilenamePattern(), basename($item) )) {
+					if(!$context->useZeroLinks())
+						$item = $context->getRelativeProjectPath($item->getRealPath());
+
+					$src = new SourceFile($item);
+					$compiler->compileTemplate($src, $this->templates, $context);
+				}
             }
         }
     }
