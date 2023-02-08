@@ -61,6 +61,6 @@ class LiteralSubdomainDecider extends AbstractNormalizingDecider
      * @inheritDoc
      */
     protected function matchComparisonValue($subdomains, $moduleName): bool {
-        return strcasecmp($this->getSubdomain(), array_pop($subdomains)) === 0 ? true : false;
+        return strcasecmp($this->getSubdomain(), array_pop($subdomains) ?: "") === 0 ? true : false;
     }
 }
