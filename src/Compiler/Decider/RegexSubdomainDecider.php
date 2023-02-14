@@ -28,7 +28,7 @@ class RegexSubdomainDecider extends LiteralSubdomainDecider
 {
     protected function matchComparisonValue($subdomains, $moduleName): bool
     {
-        $sd = array_pop($subdomains);
-        return preg_match($this->getSubdomain(), $sd) ? true : false;
+        $sd = join(".", $subdomains ?: []);
+        return (bool)preg_match($this->getSubdomain(), $sd);
     }
 }

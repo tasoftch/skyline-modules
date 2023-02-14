@@ -35,7 +35,7 @@ class LiteralURIPrefixDecider extends AbstractNormalizingDecider
      */
     protected function matchComparisonValue($uri, $moduleName): bool
     {
-        return stripos($uri, $this->getURIPrefix()) === 0 ? true : false;
+        return stripos($uri, $this->getURIPrefix()) === 0;
     }
 
     protected function getComparisonValue(Request $request, string $moduleName)
